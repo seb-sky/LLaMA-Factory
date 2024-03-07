@@ -17,7 +17,7 @@ Install requirements
 pip install -r requirements.txt
 ```
 
-## single GPU
+## single GPU examples
 
 ### AQLM
 
@@ -40,3 +40,7 @@ pip install -r requirements.txt
 * download GPTQ model
 * ```pip install "optimum>=1.12.0"```
 * ```pip install auto-gptq```
+
+## unsloth
+
+```pip install "unsloth @ git+https://github.com/unslothai/unsloth.git" xformers```

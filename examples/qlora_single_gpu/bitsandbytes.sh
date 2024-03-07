@@ -29,4 +29,5 @@ python ../../src/train_bash.py \
     --quantization_bit 4 \
     --plot_loss \
     --fp16 \
-    --logging_dir ../../logs/LLaMA2-7B/lora/sft
+    --logging_dir ../../logs/LLaMA2-7B/lora/sft \
+    --use_unsloth
