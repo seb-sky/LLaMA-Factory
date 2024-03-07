@@ -2,9 +2,18 @@
 
 # Installation
 
+Create env
 ```shell
 python3 -m venv .venv
+```
+
+Activate env
+```shell
 source .venv/bin/activate
+```
+
+Install requirements
+```shell
 pip install -r requirements.txt
 ```
 
