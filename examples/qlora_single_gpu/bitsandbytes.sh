@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HUGGING_FACE_HUB_TOKEN=hf_TODO CUDA_VISIBLE_DEVICES=1 python ../../src/train_bash.py \
+python ../../src/train_bash.py \
     --stage sft \
     --do_train \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
@@ -28,4 +28,5 @@ HUGGING_FACE_HUB_TOKEN=hf_TODO CUDA_VISIBLE_DEVICES=1 python ../../src/train_bas
     --val_size 0.1 \
     --quantization_bit 4 \
     --plot_loss \
-    --fp16
+    --fp16 \
+    --logging_dir ../../logs/LLaMA2-7B/lora/sft
