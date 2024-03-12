@@ -25,6 +25,7 @@ python src/train_bash.py \
   --logging_steps 0.01 \
   --load_best_model_at_end \
   --report_to tensorboard \
+  --lora_target q_proj,v_proj \
   --upcast_layernorm
 
 
