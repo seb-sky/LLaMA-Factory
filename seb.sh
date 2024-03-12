@@ -20,6 +20,8 @@ python src/train_bash.py \
   --logging_dir tmp/out/tensorboard/"$run_name" \
   --save_strategy steps \
   --bf16 \
+  --eval_steps 0.1 \
+  --save_steps 0.1 \
   --load_best_model_at_end \
   --report_to tensorboard \
   --lora_target q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj
