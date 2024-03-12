@@ -1,32 +1,30 @@
 run_name=seb-"$(date -u +'%FT%H%MZ')"
 
 python src/train_bash.py \
-  --model_name_or_path google/gemma-7b-it \
-  --quantization_bit 4 \
-  --flash_attn \
-  --use_unsloth \
-  --upcast_layernorm
-  --export_dir tmp/out/export \
-  --template gemma \
+  --bf16 \
   --dataset ultra_chat \
   --dataset_dir data \
-  --overwrite_cache \
-  --max_samples 1000 \
-  --val_size 0.1 \
-  --output_dir tmp/out/output/"$run_name" \
-  --overwrite_output_dir \
-  --do_train \
+  --ddp_find_unused_parameters False \
   --do_eval \
+  --do_train \
+  --eval_steps 0.1 \
   --evaluation_strategy steps \
+  --export_dir tmp/out/export \
+  --flash_attn \
+  --load_best_model_at_end \
   --logging_dir tmp/out/tensorboard/"$run_name" \
   --logging_steps 0.01 \
-  --save_strategy steps \
-  --save_steps 0.1 \
-  --bf16 \
-  --eval_steps 0.1 \
-  --load_best_model_at_end \
-  --report_to tensorboard \
-  --ddp_find_unused_parameters False \
   --lora_target q_proj,v_proj \
-
-
+  --max_samples 1000 \
+  --model_name_or_path google/gemma-7b-it \
+  --output_dir tmp/out/output/"$run_name" \
+  --overwrite_cache \
+  --overwrite_output_dir \
+  --quantization_bit 4 \
+  --report_to tensorboard \
+  --save_steps 0.1 \
+  --save_strategy steps \
+  --template gemma \
+  --upcast_layernorm \
+  --use_unsloth \
+  --val_size 0.1
