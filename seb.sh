@@ -5,6 +5,7 @@ python src/train_bash.py \
   --quantization_bit 4 \
   --flash_attn \
   --use_unsloth \
+  --upcast_layernorm
   --export_dir tmp/out/export \
   --template gemma \
   --dataset ultra_chat \
@@ -18,14 +19,14 @@ python src/train_bash.py \
   --do_eval \
   --evaluation_strategy steps \
   --logging_dir tmp/out/tensorboard/"$run_name" \
+  --logging_steps 0.01 \
   --save_strategy steps \
+  --save_steps 0.1 \
   --bf16 \
   --eval_steps 0.1 \
-  --save_steps 0.1 \
-  --logging_steps 0.01 \
   --load_best_model_at_end \
   --report_to tensorboard \
+  --ddp_find_unused_parameters False \
   --lora_target q_proj,v_proj \
-  --upcast_layernorm
 
 
