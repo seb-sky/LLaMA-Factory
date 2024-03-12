@@ -51,3 +51,11 @@ pip install -r requirements.txt
 ## tensorboard
 
 ```pip install tensorboard```
+
+## flash-attn
+
+```shell
+pip install --upgrade wheel
+pip install flash-attn
+```
+
