@@ -2,8 +2,8 @@ run_name=seb-"$(date -u +'%FT%H%MZ')"
 
 python src/train_bash.py \
   --bf16 \
-  --dataset ultra_chat \
-  --dataset_dir data \
+  --dataset skyguidetest \
+  --dataset_dir /home/vauclasn/parse_skyguidetest/output/dataset \
   --ddp_find_unused_parameters False \
   --do_eval \
   --do_train \
