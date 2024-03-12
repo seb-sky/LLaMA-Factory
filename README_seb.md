@@ -3,16 +3,19 @@
 # Installation
 
 Create env
+
 ```shell
 python3 -m venv .venv
 ```
 
 Activate env
+
 ```shell
 source .venv/bin/activate
 ```
 
 Install requirements
+
 ```shell
 pip install -r requirements.txt
 ```
@@ -44,3 +47,7 @@ pip install -r requirements.txt
 ## unsloth
 
 ```pip install "unsloth @ git+https://github.com/unslothai/unsloth.git" xformers```
+
+## tensorboard
+
+```pip install tensorboard```
