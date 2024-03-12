@@ -15,7 +15,7 @@ python src/train_bash.py \
   --logging_dir tmp/out/tensorboard/"$run_name" \
   --logging_steps 0.01 \
   --lora_target q_proj,v_proj \
-  --max_samples 1000 \
+  --max_samples 10000 \
   --model_name_or_path google/gemma-7b-it \
   --output_dir tmp/out/output/"$run_name" \
   --overwrite_cache \
