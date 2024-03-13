@@ -14,6 +14,10 @@ seb:
   source .venv/bin/activate && \
   source ./seb.sh
 
+seb-no-gpu:
+  source .venv/bin/activate && \
+  source ./seb-no-gpu.sh
+
 tensorboard:
   source .venv/bin/activate && \
   tensorboard --logdir tmp/out/tensorboard --bind_all --port 6008
