@@ -14,7 +14,7 @@ python src/train_bash.py \
   --load_best_model_at_end \
   --logging_dir tmp/out/tensorboard/"$run_name" \
   --logging_steps 0.01 \
-  --lora_target q_proj,v_proj \
+  --lora_target q_proj,k_proj,v_proj,gate_proj,up_proj,down_proj,o_proj \
   --max_samples 10000 \
   --model_name_or_path google/gemma-7b-it \
   --output_dir tmp/out/output/"$run_name" \
