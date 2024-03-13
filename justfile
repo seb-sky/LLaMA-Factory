@@ -20,4 +20,4 @@ seb-no-gpu:
 
 tensorboard:
   source .venv/bin/activate && \
-  tensorboard --logdir tmp/out/tensorboard --bind_all --port 6008
+  tensorboard --logdir tmp/out --bind_all --port 6008
