@@ -18,6 +18,10 @@ seb-no-gpu:
   source .venv/bin/activate && \
   source ./seb-no-gpu.sh
 
+seb-predict:
+  source .venv/bin/activate && \
+  source ./seb-predict.sh
+
 tensorboard:
   source .venv/bin/activate && \
   tensorboard --logdir tmp/out --bind_all --port 6008
