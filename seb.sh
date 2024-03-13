@@ -20,6 +20,7 @@ python src/train_bash.py \
   --logging_steps 0.01 \
   --lora_target q_proj,k_proj,v_proj,gate_proj,up_proj,down_proj,o_proj \
   --model_name_or_path google/gemma-7b-it \
+  --num_train_epochs 10 \
   --output_dir "$out_dir"/output \
   --overwrite_cache \
   --overwrite_output_dir \
