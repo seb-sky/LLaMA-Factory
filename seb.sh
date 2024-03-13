@@ -2,6 +2,8 @@ run_name=seb-"$(date -u +'%FT%H%MZ')"
 out_dir=tmp/out/"$run_name"
 mkdir -p "$out_dir"
 
+cp "$BASH_SOURCE" "$out_dir"/script.sh
+
 python src/train_bash.py \
   --bf16 \
   --dataset skyguidetest \
