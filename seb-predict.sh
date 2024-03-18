@@ -13,11 +13,11 @@ python src/train_bash.py \
   --do_predict \
   --flash_attn \
   --lora_target q_proj,k_proj,v_proj,gate_proj,up_proj,down_proj,o_proj \
-  --model_name_or_path mistralai/Mistral-7B-Instruct-v0.1 \
+  --model_name_or_path meta-llama/Llama-2-7b-chat-hf \
   --output_dir "$out_dir"/output \
   --predict_with_generate \
   --quantization_bit 4 \
-  --template mistral \
+  --template llama2 \
   --upcast_layernorm \
   --use_unsloth \
   |& tee "$out_dir"/log.txt
