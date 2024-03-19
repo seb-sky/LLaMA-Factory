@@ -17,6 +17,7 @@ python src/train_bash.py \
   --output_dir "$out_dir"/output \
   --predict_with_generate \
   --quantization_bit 4 \
+  --template llama2 \
   --upcast_layernorm \
   --use_unsloth \
   |& tee "$out_dir"/log.txt

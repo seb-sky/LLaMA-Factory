@@ -28,6 +28,7 @@ python src/train_bash.py \
   --report_to tensorboard \
   --save_steps 0.1 \
   --save_strategy steps \
+  --template llama2 \
   --upcast_layernorm \
   --use_unsloth \
   --val_size 0.1 \
