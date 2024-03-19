@@ -7,7 +7,7 @@ cp "$BASH_SOURCE" "$out_dir"/script.sh
 python src/train_bash.py \
   --bf16 \
   --dataset skyguidetest_train \
-  --dataset_dir /home/vauclasn/parse_skyguidetest/output/dataset \
+  --dataset_dir /home/vauclasn/parse_skyguidetest/output/dataset/v1 \
   --ddp_find_unused_parameters False \
   --do_eval \
   --do_train \

@@ -8,7 +8,7 @@ python src/train_bash.py \
   --adapter_name_or_path /home/vauclasn/LLaMA-Factory/tmp/out/seb-2024-03-19T1244Z/output \
   --bf16 \
   --dataset skyguidetest_test \
-  --dataset_dir /home/vauclasn/parse_skyguidetest/output/dataset \
+  --dataset_dir /home/vauclasn/parse_skyguidetest/output/dataset/v1 \
   --ddp_find_unused_parameters False \
   --do_predict \
   --flash_attn \
