@@ -19,7 +19,7 @@ python src/train_bash.py \
   --logging_dir "$out_dir" \
   --logging_steps 0.01 \
   --lora_target q_proj,k_proj,v_proj,gate_proj,up_proj,down_proj,o_proj \
-  --model_name_or_path codellama/CodeLlama-7b-hf \
+  --model_name_or_path beowolx/CodeNinja-1.0-OpenChat-7B \
   --num_train_epochs 10 \
   --output_dir "$out_dir"/output \
   --overwrite_cache \
@@ -28,7 +28,7 @@ python src/train_bash.py \
   --report_to tensorboard \
   --save_steps 0.1 \
   --save_strategy steps \
-  --template llama2 \
+  --template openchat \
   --upcast_layernorm \
   --use_unsloth \
   --val_size 0.1 \
