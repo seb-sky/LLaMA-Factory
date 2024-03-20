@@ -30,6 +30,5 @@ python src/train_bash.py \
   --save_strategy steps \
   --template openchat \
   --upcast_layernorm \
-  --use_unsloth \
   --val_size 0.1 \
   |& tee "$out_dir"/log.txt

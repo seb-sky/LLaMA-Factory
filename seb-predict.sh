@@ -5,7 +5,7 @@ mkdir -p "$out_dir"
 cp "$BASH_SOURCE" "$out_dir"/script.sh
 
 python src/train_bash.py \
-  --adapter_name_or_path /home/vauclasn/LLaMA-Factory/tmp/out/seb-2024-03-19T1725Z/output \
+  --adapter_name_or_path /home/vauclasn/LLaMA-Factory/tmp/out/seb-2024-03-20T0655Z/output \
   --bf16 \
   --dataset skyguidetest_test \
   --dataset_dir /home/vauclasn/parse_skyguidetest/output/dataset/v1 \
@@ -19,5 +19,4 @@ python src/train_bash.py \
   --quantization_bit 4 \
   --template openchat \
   --upcast_layernorm \
-  --use_unsloth \
   |& tee "$out_dir"/log.txt
