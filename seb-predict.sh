@@ -19,4 +19,5 @@ python src/train_bash.py \
   --quantization_bit 4 \
   --template openchat \
   --upcast_layernorm \
+  --use_unsloth \
   |& tee "$out_dir"/log.txt
