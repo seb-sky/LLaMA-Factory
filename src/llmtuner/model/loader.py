@@ -1,9 +1,9 @@
-from contextlib import nullcontext
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict
 
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 from trl import AutoModelForCausalLMWithValueHead
 
+from ..extras.constants import MOD_SUPPORTED_MODELS
 from ..extras.logging import get_logger
 from ..extras.misc import count_parameters, get_current_device, try_download_model_from_ms
 from .adapter import init_adapter
@@ -21,6 +21,7 @@ logger = get_logger(__name__)
 
 
 def _get_init_kwargs(model_args: "ModelArguments") -> Dict[str, Any]:
+    model_args.model_name_or_path = try_download_model_from_ms(model_args)
     return {
         "trust_remote_code": True,
         "cache_dir": model_args.cache_dir,
@@ -35,16 +36,23 @@ def load_tokenizer(model_args: "ModelArguments") -> "PreTrainedTokenizer":
 
     Note: including inplace operation of model_args.
     """
-    try_download_model_from_ms(model_args)
     init_kwargs = _get_init_kwargs(model_args)
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_args.model_name_or_path,
+            use_fast=model_args.use_fast_tokenizer,
+            split_special_tokens=model_args.split_special_tokens,
+            padding_side="right",
+            **init_kwargs,
+        )
+    except ValueError:  # try the fast one
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_args.model_name_or_path,
+            use_fast=True,
+            padding_side="right",
+            **init_kwargs,
+        )
 
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_args.model_name_or_path,
-        use_fast=model_args.use_fast_tokenizer,
-        split_special_tokens=model_args.split_special_tokens,
-        padding_side="right",
-        **init_kwargs,
-    )
     patch_tokenizer(tokenizer)
     return tokenizer
 
@@ -53,8 +61,8 @@ def load_model(
     tokenizer: "PreTrainedTokenizer",
     model_args: "ModelArguments",
     finetuning_args: "FinetuningArguments",
-    is_trainable: Optional[bool] = False,
-    add_valuehead: Optional[bool] = False,
+    is_trainable: bool = False,
+    add_valuehead: bool = False,
 ) -> "PreTrainedModel":
     r"""
     Loads pretrained model. Must after load_tokenizer.
@@ -75,6 +83,8 @@ def load_model(
             "token": model_args.hf_hub_token,
             "device_map": {"": get_current_device()},
             "rope_scaling": getattr(config, "rope_scaling", None),
+            "fix_tokenizer": False,
+            "trust_remote_code": True,
         }
         try:
             model, _ = FastLanguageModel.from_pretrained(**unsloth_kwargs)
@@ -87,17 +97,24 @@ def load_model(
             logger.warning("Unsloth does not support loading adapters.")
 
     if model is None:
-        model_init_context = nullcontext()
-        if model_args.aqlm_optimization and getattr(config, "quantization_config", None):
-            quantization_config: Dict[str, Any] = getattr(config, "quantization_config", None)
-            if quantization_config.get("quant_method", None) == "aqlm":
-                import aqlm  # type: ignore
+        init_kwargs["config"] = config
+        init_kwargs["pretrained_model_name_or_path"] = model_args.model_name_or_path
 
-                model_init_context = aqlm.optimize_for_training()
-                logger.info("Optimize for AQLM training.")  # https://github.com/Vahe1994/AQLM/issues/38
+        if model_args.mixture_of_depths == "load":
+            from MoD import AutoMoDModelForCausalLM
 
-        with model_init_context:
-            model = AutoModelForCausalLM.from_pretrained(model_args.model_name_or_path, config=config, **init_kwargs)
+            model = AutoMoDModelForCausalLM.from_pretrained(**init_kwargs)
+        else:
+            model = AutoModelForCausalLM.from_pretrained(**init_kwargs)
+
+        if model_args.mixture_of_depths == "convert":
+            from MoD import apply_mod_to_hf
+
+            if getattr(config, "model_type", None) not in MOD_SUPPORTED_MODELS:
+                raise ValueError("Current model is not supported by mixture-of-depth.")
+
+            model = apply_mod_to_hf(model)
+            model = model.to(model_args.compute_dtype)
 
     patch_model(model, tokenizer, model_args, is_trainable)
     register_autoclass(config, model, tokenizer)
@@ -105,7 +122,7 @@ def load_model(
     model = init_adapter(model, model_args, finetuning_args, is_trainable)
 
     if add_valuehead:
-        model: "AutoModelForCausalLMWithValueHead" = AutoModelForCausalLMWithValueHead.from_pretrained(model)
+        model = AutoModelForCausalLMWithValueHead.from_pretrained(model)
         patch_valuehead_model(model)
 
         if model_args.adapter_name_or_path is not None:
@@ -120,7 +137,6 @@ def load_model(
 
     if not is_trainable:
         model.requires_grad_(False)
-        model = model.to(model_args.compute_dtype) if not getattr(model, "quantization_method", None) else model
         model.eval()
     else:
         model.train()
@@ -143,17 +159,3 @@ def load_model(
             )
 
     return model
-
-
-def load_model_and_tokenizer(
-    model_args: "ModelArguments",
-    finetuning_args: "FinetuningArguments",
-    is_trainable: Optional[bool] = False,
-    add_valuehead: Optional[bool] = False,
-) -> Tuple["PreTrainedModel", "PreTrainedTokenizer"]:
-    r"""
-    Loads pretrained model and tokenizer.
-    """
-    tokenizer = load_tokenizer(model_args)
-    model = load_model(tokenizer, model_args, finetuning_args, is_trainable, add_valuehead)
-    return model, tokenizer

@@ -1,11 +1,14 @@
 from typing import TYPE_CHECKING, Dict
 
-import gradio as gr
-
 from ...data import templates
 from ...extras.constants import METHODS, SUPPORTED_MODELS
+from ...extras.packages import is_gradio_available
 from ..common import get_model_path, get_template, list_adapters, save_config
 from ..utils import can_quantize
+
+
+if is_gradio_available():
+    import gradio as gr
 
 
 if TYPE_CHECKING:
@@ -22,10 +25,10 @@ def create_top() -> Dict[str, "Component"]:
 
     with gr.Row():
         finetuning_type = gr.Dropdown(choices=METHODS, value="lora", scale=1)
-        adapter_path = gr.Dropdown(multiselect=True, scale=5, allow_custom_value=True)
+        adapter_path = gr.Dropdown(multiselect=True, allow_custom_value=True, scale=5)
         refresh_btn = gr.Button(scale=1)
 
-    with gr.Accordion(label="Advanced config", open=False) as advanced_tab:
+    with gr.Accordion(open=False) as advanced_tab:
         with gr.Row():
             quantization_bit = gr.Dropdown(choices=["none", "8", "4"], value="none")
             template = gr.Dropdown(choices=list(templates.keys()), value="default")

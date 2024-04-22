@@ -36,8 +36,8 @@ class Template:
         messages: List[Dict[str, str]],
         system: Optional[str] = None,
         tools: Optional[str] = None,
-        cutoff_len: Optional[int] = 1_000_000,
-        reserved_label_len: Optional[int] = 1,
+        cutoff_len: int = 1_000_000,
+        reserved_label_len: int = 1,
     ) -> Tuple[List[int], List[int]]:
         r"""
         Returns a single pair of token ids representing prompt and response respectively.
@@ -56,8 +56,8 @@ class Template:
         messages: List[Dict[str, str]],
         system: Optional[str] = None,
         tools: Optional[str] = None,
-        cutoff_len: Optional[int] = 1_000_000,
-        reserved_label_len: Optional[int] = 1,
+        cutoff_len: int = 1_000_000,
+        reserved_label_len: int = 1,
     ) -> Sequence[Tuple[List[int], List[int]]]:
         r"""
         Returns multiple pairs of token ids representing prompts and responses respectively.
@@ -207,11 +207,11 @@ def _register_template(
     format_observation: Optional["Formatter"] = None,
     format_tools: Optional["Formatter"] = None,
     format_separator: Optional["Formatter"] = None,
-    default_system: Optional[str] = "",
-    stop_words: Optional[List[str]] = [],
-    efficient_eos: Optional[bool] = False,
-    replace_eos: Optional[bool] = False,
-    force_system: Optional[bool] = False,
+    default_system: str = "",
+    stop_words: List[str] = [],
+    efficient_eos: bool = False,
+    replace_eos: bool = False,
+    force_system: bool = False,
 ) -> None:
     r"""
     Registers a chat template.
@@ -279,9 +279,7 @@ def _jinja_escape(content: str) -> str:
     return content.replace("\n", r"\n").replace("'", r"\'")
 
 
-def _convert_slots_to_jinja(
-    slots: "SLOTS", tokenizer: "PreTrainedTokenizer", placeholder: Optional[str] = "content"
-) -> str:
+def _convert_slots_to_jinja(slots: "SLOTS", tokenizer: "PreTrainedTokenizer", placeholder: str = "content") -> str:
     slot_items = []
     for slot in slots:
         if isinstance(slot, str):
@@ -345,7 +343,7 @@ def get_template_and_fix_tokenizer(
     name: Optional[str] = None,
 ) -> Template:
     if name is None:
-        template = templates["vanilla"]  # placeholder
+        template = templates["empty"]  # placeholder
     else:
         template = templates.get(name, None)
         if template is None:
@@ -387,7 +385,8 @@ _register_template(
     format_user=StringFormatter(slots=["### Instruction:\n{{content}}\n\n### Response:\n"]),
     format_separator=EmptyFormatter(slots=["\n\n"]),
     default_system=(
-        "Below is an instruction that describes a task. " "Write a response that appropriately completes the request."
+        "Below is an instruction that describes a task. "
+        "Write a response that appropriately completes the request.\n\n"
     ),
 )
 
@@ -416,7 +415,7 @@ _register_template(
 
 _register_template(
     name="baichuan",
-    format_user=StringFormatter(slots=["<reserved_102>{{content}}<reserved_103>"]),
+    format_user=StringFormatter(slots=[{"token": "<reserved_102>"}, "{{content}}", {"token": "<reserved_103>"}]),
     efficient_eos=True,
 )
 
@@ -440,6 +439,18 @@ _register_template(
 _register_template(
     name="bluelm",
     format_user=StringFormatter(slots=[{"token": "[|Human|]:"}, "{{content}}", {"token": "[|AI|]:"}]),
+)
+
+
+_register_template(
+    name="breeze",
+    format_user=StringFormatter(slots=["[INST] {{content}} [/INST] "]),
+    format_system=StringFormatter(slots=[{"bos_token"}, "{{content}}"]),
+    default_system=(
+        "You are a helpful AI assistant built by MediaTek Research. "
+        "The user you are helping speaks Traditional Chinese and comes from Taiwan."
+    ),
+    efficient_eos=True,
 )
 
 
@@ -517,6 +528,21 @@ _register_template(
 
 
 _register_template(
+    name="cohere",
+    format_user=StringFormatter(
+        slots=[
+            (
+                "<|START_OF_TURN_TOKEN|><|USER_TOKEN|>{{content}}<|END_OF_TURN_TOKEN|>"
+                "<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>"
+            )
+        ]
+    ),
+    format_system=EmptyFormatter(slots=[{"bos_token"}]),
+    force_system=True,
+)
+
+
+_register_template(
     name="cpm",
     format_user=StringFormatter(slots=["<用户>{{content}}<AI>"]),
     format_system=StringFormatter(slots=[{"bos_token"}, "{{content}}"]),
@@ -557,9 +583,23 @@ _register_template(
 
 
 _register_template(
+    name="empty",
+    format_user=StringFormatter(slots=["{{content}}"]),
+    format_assistant=StringFormatter(slots=["{{content}}"]),
+)
+
+
+_register_template(
     name="falcon",
     format_user=StringFormatter(slots=["User: {{content}}\nFalcon:"]),
     format_separator=EmptyFormatter(slots=["\n"]),
+    efficient_eos=True,
+)
+
+
+_register_template(
+    name="fewshot",
+    format_separator=EmptyFormatter(slots=["\n\n"]),
     efficient_eos=True,
 )
 
@@ -626,9 +666,37 @@ _register_template(
 
 
 _register_template(
+    name="llama3",
+    format_user=StringFormatter(
+        slots=[
+            (
+                "<|start_header_id|>user<|end_header_id|>\n\n{{content}}<|eot_id|>"
+                "<|start_header_id|>assistant<|end_header_id|>\n\n"
+            )
+        ]
+    ),
+    format_system=StringFormatter(
+        slots=[{"bos_token"}, "<|start_header_id|>system<|end_header_id|>\n\n{{content}}<|eot_id|>"]
+    ),
+    default_system="You are a helpful assistant.",
+    stop_words=["<|eot_id|>"],
+    replace_eos=True,
+)
+
+
+_register_template(
     name="mistral",
-    format_user=StringFormatter(slots=["[INST] {{content}} [/INST]"]),
+    format_user=StringFormatter(slots=[" [INST] {{content}} [/INST]"]),
     format_system=StringFormatter(slots=[{"bos_token"}, "{{content}}"]),
+    force_system=True,
+)
+
+
+_register_template(
+    name="olmo",
+    format_user=StringFormatter(slots=["<|user|>\n{{content}}<|assistant|>"]),
+    format_assistant=StringFormatter(slots=["{{content}}", {"eos_token"}]),
+    format_system=StringFormatter(slots=[{"eos_token"}, "{{content}}"]),
     force_system=True,
 )
 
@@ -677,11 +745,6 @@ _register_template(
     stop_words=["<|end|>"],
     replace_eos=True,
     force_system=True,
-)
-
-
-_register_template(
-    name="vanilla",
 )
 
 

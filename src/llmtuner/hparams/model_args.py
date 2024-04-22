@@ -53,21 +53,33 @@ class ModelArguments:
         default=True,
         metadata={"help": "Whether or not to use double quantization in int4 training."},
     )
+    quantization_device_map: Optional[Literal["auto"]] = field(
+        default=None,
+        metadata={"help": "Device map used to infer the 4-bit quantized model, needs bitsandbytes>=0.43.0."},
+    )
     rope_scaling: Optional[Literal["linear", "dynamic"]] = field(
         default=None,
         metadata={"help": "Which scaling strategy should be adopted for the RoPE embeddings."},
     )
     flash_attn: bool = field(
         default=False,
-        metadata={"help": "Enable FlashAttention-2 for faster training."},
+        metadata={"help": "Enable FlashAttention for faster training."},
     )
     shift_attn: bool = field(
         default=False,
         metadata={"help": "Enable shift short attention (S^2-Attn) proposed by LongLoRA."},
     )
+    mixture_of_depths: Optional[Literal["convert", "load"]] = field(
+        default=None,
+        metadata={"help": "Convert the model to mixture-of-depths (MoD) or load the MoD model."},
+    )
     use_unsloth: bool = field(
         default=False,
         metadata={"help": "Whether or not to use unsloth's optimization for the LoRA training."},
+    )
+    moe_aux_loss_coef: Optional[float] = field(
+        default=None,
+        metadata={"help": "Coefficient of the auxiliary router loss in mixture-of-experts model."},
     )
     disable_gradient_checkpointing: bool = field(
         default=False,
@@ -81,9 +93,29 @@ class ModelArguments:
         default=False,
         metadata={"help": "Whether or not to upcast the output of lm_head in fp32."},
     )
-    infer_backend: Literal["hf", "vllm"] = field(
-        default="hf",
+    infer_backend: Literal["huggingface", "vllm"] = field(
+        default="huggingface",
         metadata={"help": "Backend engine used at inference."},
+    )
+    vllm_maxlen: int = field(
+        default=2048,
+        metadata={"help": "Maximum input length of the vLLM engine."},
+    )
+    vllm_gpu_util: float = field(
+        default=0.9,
+        metadata={"help": "The fraction of GPU memory in (0,1) to be used for the vLLM engine."},
+    )
+    vllm_enforce_eager: bool = field(
+        default=False,
+        metadata={"help": "Whether or not to disable CUDA graph in the vLLM engine."},
+    )
+    offload_folder: str = field(
+        default="offload",
+        metadata={"help": "Path to offload model weights."},
+    )
+    use_cache: bool = field(
+        default=True,
+        metadata={"help": "Whether or not to use KV cache in generation."},
     )
     hf_hub_token: Optional[str] = field(
         default=None,
@@ -100,6 +132,10 @@ class ModelArguments:
     export_size: int = field(
         default=1,
         metadata={"help": "The file shard size (in GB) of the exported model."},
+    )
+    export_device: str = field(
+        default="cpu",
+        metadata={"help": "The device used in model export."},
     )
     export_quantization_bit: Optional[int] = field(
         default=None,
@@ -131,7 +167,6 @@ class ModelArguments:
     )
 
     def __post_init__(self):
-        self.aqlm_optimization = None
         self.compute_dtype = None
         self.device_map = None
         self.model_max_length = None
